@@ -5,6 +5,8 @@ import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +23,7 @@ public class Transaction {
     private Long id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TransactionType type;
 
     @Column(nullable = false, precision = 19, scale = 2)
@@ -36,6 +39,7 @@ public class Transaction {
     private Instant createdAt;
 
     @Column (nullable = false)
+    @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
     protected Transaction(){};
