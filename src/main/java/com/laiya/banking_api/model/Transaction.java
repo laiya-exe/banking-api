@@ -45,15 +45,21 @@ public class Transaction {
     protected Transaction() {
     };
 
-    public Transaction(Account sourceAccount, Account destinationAccount, BigDecimal amount, TransactionType type){
+    public Transaction(Account sourceAccount, Account destinationAccount, BigDecimal amount, TransactionType type) {
         setType(type);
         setAmount(amount);
-        if(type == TransactionType.DEPOSIT)
-            { setSourceAccount(null); setDestinationAccount(destinationAccount);}
-        if (type == TransactionType.WITHDRAWAL)
-            { setSourceAccount(sourceAccount); setDestinationAccount(null);}
-        if (type == TransactionType.TRANSFER) 
-            { setSourceAccount(sourceAccount); setDestinationAccount(destinationAccount);}
+        if (type == TransactionType.DEPOSIT) {
+            setSourceAccount(null);
+            setDestinationAccount(destinationAccount);
+        }
+        if (type == TransactionType.WITHDRAWAL) {
+            setSourceAccount(sourceAccount);
+            setDestinationAccount(null);
+        }
+        if (type == TransactionType.TRANSFER) {
+            setSourceAccount(sourceAccount);
+            setDestinationAccount(destinationAccount);
+        }
         onCreate();
         setStatus(TransactionStatus.COMPLETED);
     }
