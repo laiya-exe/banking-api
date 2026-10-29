@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.laiya.banking_api.dto.TransactionResponse;
-import com.laiya.banking_api.dto.TransfertRequest;
+import com.laiya.banking_api.dto.TransferRequest;
 import com.laiya.banking_api.exception.AccountNotFoundException;
 import com.laiya.banking_api.exception.InvalidTransferException;
 import com.laiya.banking_api.model.Account;
@@ -24,7 +24,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionResponse transfer(TransfertRequest request) {
+    public TransactionResponse transfer(TransferRequest request) {
         if (request.sourceAccountId().compareTo(request.destinationAccountId()) == 0)
             throw new InvalidTransferException("Virement vers le même compte refusé.");
 

@@ -8,23 +8,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.laiya.banking_api.dto.TransactionResponse;
-import com.laiya.banking_api.dto.TransfertRequest;
+import com.laiya.banking_api.dto.TransferRequest;
 import com.laiya.banking_api.service.TransactionService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/transfers")
-public class TransfertController {
+public class TransferController {
 
     private final TransactionService transactionService;
 
-    public TransfertController(TransactionService transactionService) {
+    public TransferController(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> createTransfert(@Valid @RequestBody TransfertRequest request) {
+    public ResponseEntity<TransactionResponse> createTransfer(@Valid @RequestBody TransferRequest request) {
         TransactionResponse response = transactionService.transfer(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

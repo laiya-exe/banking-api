@@ -60,6 +60,7 @@ public class AccountService {
         return AccountResponse.from(destinationAccount);
     }
 
+    @Transactional
     public AccountResponse withdraw(Long id, BigDecimal amount) {
         Account sourceAccount = getById(id);
         sourceAccount.withdraw(amount);
