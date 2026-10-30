@@ -37,15 +37,19 @@ docker compose up --build
 ### Option 2 : Mode Local (Sans Docker - Base H2)
 L'application bascule automatiquement sur une base en mémoire H2. 
 
-**(PowerShell/CMD) :**
+**Sur Windows (PowerShell/CMD) :**
 ```cmd
 .\mvnw spring-boot:run
+```
+**Sur Linux / macOS :**
+```bash
+./mvnw spring-boot:run
 ```
 
 ### Exécution des Tests
 Pour lancer la suite de tests unitaires et d'intégration :
 ```bash
-.\mvnw test
+.\mvnw test # (ou .\mvnw test sur Windows)
 ```
 
 ---
@@ -56,8 +60,8 @@ Pour lancer la suite de tests unitaires et d'intégration :
 | :--- | :--- | :--- | :--- |
 | **POST** | `/accounts` | Création d'un nouveau compte bancaire | `201 Created` |
 | **GET** | `/accounts/{id}` | Consultation du solde et détails d'un compte | `200 OK` |
-| **POST** | `/accounts/{id}/deposit` | Dépôt d'argent sur un compte | `201 Created` |
-| **POST** | `/accounts/{id}/withdraw` | Retrait d'argent sur un compte | `201 Created` |
+| **POST** | `/accounts/{id}/deposit` | Dépôt d'argent sur un compte | `200 OK` |
+| **POST** | `/accounts/{id}/withdraw` | Retrait d'argent sur un compte | `200 OK` |
 | **POST** | `/transfers` | Virement de compte à compte | `201 Created` |
 | **GET** | `/accounts/{id}/transactions` | Historique complet des transactions | `200 OK` |
 
@@ -91,7 +95,7 @@ curl -i localhost:8080/accounts/2
 ```
 
 ### 4. Gestion des erreurs standardisée (`ProblemDetail`)
-L'API implémente la spécification RFC 7807 pour renvoyer des erreurs claires. Exemple avec un montant de dépôt invalide :
+L'API implémente la spécification RFC 9457 pour renvoyer des erreurs claires. Exemple avec un montant de dépôt invalide :
 ```bash
 curl -i -X POST localhost:8080/accounts/2/deposit -H "Content-Type: application/json" -d '{"amount": -5}'
 ```
@@ -112,10 +116,10 @@ curl -i -X POST localhost:8080/accounts/2/deposit -H "Content-Type: application/
 
 ## Architecture et Choix Techniques
 
-* **`BigDecimal` pour la précision monétaire** : L'argent étant une donnée critique, l'utilisation de types flottants (`double`, `float`) a été proscrite pour éviter les erreurs d'approximation binaire. `BigDecimal` garantit une exactitude mathématique absolue en base décimale.
+* **`BigDecimal` pour la précision monétaire** : L'argent étant une donnée critique, l'utilisation de types flottants (`double`, `float`) a été proscrite pour éviter les erreurs d'approximation binaire. `BigDecimal` étant plus exact en base décimale, il est plus adapté.
 * **`@Transactional` pour l'atomicité des virements** : Un transfert d'argent exige que le débit du compte A et le crédit du compte B réussissent ensemble. Si l'une des étapes échoue, un mécanisme de *rollback* automatique annule l'intégralité de l'opération en base de données.
 * **`@Version` contre les écritures perdues (Optimistic Locking)** : Pour empêcher deux requêtes simultanées de modifier un même solde en se basant sur des données obsolètes, un mécanisme de verrouillage optimiste via un champ de versioning a été mis en place.
-* **Encapsulation métier dans l'entité `Account`** : Conformément aux principes de la programmation orientée objet (POO) et du Domain-Driven Design (DDD), les règles de gestion (comme l'interdiction d'un solde négatif) sont directement protégées au sein de l'entité.
+* **Encapsulation métier dans l'entité `Account`** : Conformément aux principes de la programmation orientée objet (POO), les règles de gestion (comme l'interdiction d'un solde négatif) sont directement protégées au sein de l'entité (encapsulation).
 * **Découplage par DTO et Bean Validation** : L'usage de Data Transfer Objects (DTO) isole le modèle de données de la couche d'exposition API, tout en interceptant et rejetant les requêtes malformées dès l'entrée du contrôleur.
 * **Gestion centralisée des exceptions** : Utilisation d'un `@ControllerAdvice` global pour intercepter les exceptions. Cela évite de saturer l'application de blocs `try/catch` répétitifs et garantit un format d'erreur unifié (`ProblemDetail`) pour simplifier l'intégration avec le Frontend.
 
@@ -133,13 +137,13 @@ La logique métier et les scénarios aux limites sont sécurisés par une suite 
 | `transfer_shouldFail_whenInsufficientFunds()` | S'assure de l'échec d'un virement si le compte source est à sec, avec garantie qu'aucun fonds n'a bougé. |
 | `transfer_shouldFail_whenSourceIsDestination()` | Bloque les tentatives de virement d'un compte vers lui-même. |
 | `transfer_shouldFail_whenAccountNotFound()` | Valide la levée d'une exception si l'un des comptes cibles n'existe pas. |
-| `transactionalTransfer()` | Test d'intégration qui valide le comportement réel du *rollback* de `@Transactional`. |
+| `transactionalTransfert()` | Test d'intégration qui prouve que la base reste intacte après un virement échoué |
 
 ---
 
 ## Feuille de Route & Améliorations (Roadmap)
 
-Le projet a été conçu pour évoluer vers une architecture microservices prête pour la production. Principaux axes d'amélioration identifiés :
+Le projet a été conçu selon un découpage modulaire strict, facilitant une transition future vers une architecture microservices. Principaux axes d'amélioration identifiés :
 
 - **Gestion des schémas de BDD** : Remplacer `ddl-auto=update` par un outil de migration de base de données comme **Flyway** ou **Liquibase**.
 - **Sécurité des secrets** : Sortir les mots de passe en clair du fichier `docker-compose.yml` pour utiliser des variables d'environnement ou un orchestrateur de secrets (**HashiCorp Vault**).
