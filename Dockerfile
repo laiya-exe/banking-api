@@ -5,7 +5,7 @@ COPY pom.xml .
 # Telechargement des dependances dans un autre couche
 RUN mvn -B dependency:go-offline
 COPY src ./src
-# Run des tests
+# Build l'app en sautant les tests.
 RUN mvn -B package -DskipTests
 
 # Execution
